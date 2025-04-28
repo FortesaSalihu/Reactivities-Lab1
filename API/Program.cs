@@ -17,13 +17,21 @@ builder.Services.AddCors();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Redirect HTTP to HTTPS (important when using mkcert and https://localhost:3000)
+app.UseHttpsRedirection();
 
-//allows http or https while showing data
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod()
-    .WithOrigins("http://localhost:3000","https://localhost:3000"));
+// Enable CORS
+app.UseCors(x => x
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithOrigins("http://localhost:3000", "https://localhost:3000")); // allow both
 
+// Authorization middleware (optional but recommended)
+app.UseAuthorization();
+
+// Map controllers
 app.MapControllers();
+
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
