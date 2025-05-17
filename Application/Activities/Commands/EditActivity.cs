@@ -1,33 +1,29 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
+using Domain;
 using MediatR;
 using Persistence;
-using Domain;
-using AutoMapper;
 
-namespace Application.Activities.Commands
+namespace Application.Activities.Commands;
+
+public class EditActivity
 {
-    public class EditActivity
+    public class Command : IRequest
     {
-        public class Command : IRequest
-        {
-            public required Activity Activity {get; set; }
-        }
+        public required Activity Activity { get; set; }
+    }
 
-        public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command>
+    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command>
+    {
+        public async Task Handle(Command request, CancellationToken cancellationToken)
         {
-            public async Task Handle(Command request, CancellationToken cancellationToken)
-            {
-                var activity = await context.Activities
-                    .FindAsync(request.Activity.Id, cancellationToken)
-                        ?? throw new Exception("Cannot find activity");
-                
-                mapper.Map(request.Activity, activity);
+            var activity = await context.Activities
+                .FindAsync([request.Activity.Id], cancellationToken)
+                    ?? throw new Exception("Cannot find activity");
 
-                await context.SaveChangesAsync(cancellationToken);
-            }
+            mapper.Map(request.Activity, activity);
+
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 }
