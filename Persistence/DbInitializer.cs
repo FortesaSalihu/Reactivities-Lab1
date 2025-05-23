@@ -5,11 +5,9 @@ namespace Persistence;
 
 public class DbInitializer
 {
-    //static because we dont need to create a new instance of DB initializer to make use of the seed data method
-
     public static async Task SeedData(AppDbContext context)
     {
-        if(context.Activities.Any()) return;
+        if (context.Activities.Any()) return;
 
         var activities = new List<Activity>
         {
@@ -121,10 +119,8 @@ public class DbInitializer
             }
         };
 
-        //entity framework is tracking the fact that we updatet an entity and its tracking in memory
         context.Activities.AddRange(activities);
 
-        //SaveChangesAsync is executing a query against database and its going to add all of activities into it
         await context.SaveChangesAsync();
     }
 }

@@ -1,5 +1,8 @@
+using API.Middleware;
 using Application.Activities.Queries;
+using Application.Activities.Validators;
 using Application.Core;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -18,12 +21,19 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 //add cors
 builder.Services.AddCors();
 builder.Services.AddMediatR(x =>
-    x.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>());
+{
+    x.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>();
+    x.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+    
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+builder.Services.AddValidatorsFromAssemblyContaining<CreateActivityValidator>();
+builder.Services.AddTransient<ExceptionMiddleware>();
 
 var app = builder.Build();
 
 // Redirect HTTP to HTTPS (important when using mkcert and https://localhost:3000)
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 // Enable CORS
