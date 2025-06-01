@@ -25,7 +25,7 @@ public class ActivitiesController : BaseApiController
     //{} means that it is a placeholder that will be replaced with the actual ID that we're gonna get from the route params
     //get a single activity
     [HttpGet("{id}")]
-    public async Task<ActionResult<Activity>> GetActivityDetail(string id)
+    public async Task<ActionResult<ActivityDto>> GetActivityDetail(string id)
     {
         return HandleResult(await Mediator.Send(new GetActivityDetails.Query { Id = id }));
     }
