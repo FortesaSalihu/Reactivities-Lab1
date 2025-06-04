@@ -34,7 +34,6 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
 
     [AllowAnonymous]
     [HttpGet("user-info")]
-
     public async Task<ActionResult> GetUserInfo()
     {
         if (User.Identity?.IsAuthenticated == false) return NoContent();
@@ -47,7 +46,7 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
         {
             user.DisplayName,
             user.Email,
-            User.Identity, //id ? identity
+            user.Id,
             user.ImageUrl
         });
     }
