@@ -15,7 +15,7 @@ import { formatDate } from "../../../lib/util/util";
 import AvatarPopover from "../../../app/shared/components/AvatarPopover";
 
 type Props = {
-  activity: Activity;
+  activity: Activity
 };
 
 export default function ActivityCard({ activity }: Props) {
