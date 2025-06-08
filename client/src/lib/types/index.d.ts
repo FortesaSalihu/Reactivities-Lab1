@@ -1,3 +1,8 @@
+type PagedList<T, TCursor> = {
+  items: T[],
+  nextCursor: TCursor
+}
+
 //jason to ts
 type Activity = {
   id: string;
@@ -16,7 +21,7 @@ type Activity = {
   hostId: string;
   hostDisplayName: string;
   hostImage: string; //?
-  hostImageUrl: string;
+  hostImageUrl?: string;
 };
 
 type Profile = {

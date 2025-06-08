@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import agent from "../agent";
-import { useMemo } from "react";
+import agent from "../agent"
+import { useMemo, useState } from "react";
 import { EditProfileSchema } from "../schemas/editProfileSchema";
 
-
 export const useProfile = (id?: string, predicate?: string) => {
+    const [filter, setFilter] = useState<string | null>(null);
     const queryClient = useQueryClient();
 
-    const {data: profile, isLoading: loadingProfile} = useQuery<Profile>({
+    const { data: profile, isLoading: loadingProfile } = useQuery<Profile>({
         queryKey: ['profile', id],
         queryFn: async () => {
             const response = await agent.get<Profile>(`/profiles/${id}`);
@@ -33,14 +33,27 @@ export const useProfile = (id?: string, predicate?: string) => {
             return response.data;
         },
         enabled: !!id && !!predicate
-    })
+    });
+
+    const {data: userActivities, isLoading: loadingUserActivities} = useQuery({
+        queryKey: ['user-activities', filter],
+        queryFn: async () => {
+            const response = await agent.get<Activity[]>(`/profiles/${id}/activities`, {
+                params: {
+                    filter
+                }
+            });
+            return response.data
+        },
+        enabled: !!id && !!filter
+    });
 
     const uploadPhoto = useMutation({
         mutationFn: async (file: Blob) => {
             const formData = new FormData();
             formData.append('file', file);
             const response = await agent.post('/profiles/add-photo', formData, {
-                headers: {'Content-Type' : 'multipart/form-data'}
+                headers: {'Content-Type': 'multipart/form-data'}
             });
             return response.data;
         },
@@ -71,18 +84,18 @@ export const useProfile = (id?: string, predicate?: string) => {
         },
         onSuccess: (_, photo) => {
             queryClient.setQueryData(['user'], (userData: User) => {
-               if (!userData) return userData;
-               return {
-                ...userData,
-                imageUrl: photo.url
-               }
+                if (!userData) return userData;
+                return {
+                    ...userData,
+                    imageUrl: photo.url
+                }
             });
             queryClient.setQueryData(['profile', id], (profile: Profile) => {
-               if (!profile) return profile;
-               return {
-                 ...profile,
-                 imageUrl: photo.url,
-               };
+                if (!profile) return profile;
+                return {
+                    ...profile,
+                    imageUrl: photo.url
+                }
             })
         }
     })
@@ -96,30 +109,30 @@ export const useProfile = (id?: string, predicate?: string) => {
                 return photos?.filter(x => x.id !== photoId)
             })
         }
-    })
+    });
 
     const updateProfile = useMutation({
-      mutationFn: async (profile: EditProfileSchema) => {
-        await agent.put(`/profiles`, profile);
-      },
-      onSuccess: (_, profile) => {
-        queryClient.setQueryData(["profile", id], (data: Profile) => {
-          if (!data) return data;
-          return {
-            ...data,
-            displayName: profile.displayName,
-            bio: profile.bio,
-          };
-        });
-        queryClient.setQueryData(["user"], (userData: User) => {
-          if (!userData) return userData;
-          return {
-            ...userData,
-            displayName: profile.displayName,
-          };
-        });
-      },
-    });
+        mutationFn: async (profile: EditProfileSchema) => {
+            await agent.put(`/profiles`, profile);
+        },
+        onSuccess: (_, profile) => {
+            queryClient.setQueryData(['profile', id], (data: Profile) => {
+                if (!data) return data;
+                return {
+                    ...data,
+                    displayName: profile.displayName,
+                    bio: profile.bio
+                }
+            });
+            queryClient.setQueryData(['user'], (userData: User) => {
+                if (!userData) return userData;
+                return {
+                    ...userData,
+                    displayName: profile.displayName
+                }
+            });
+        }
+    })
 
     const updateFollowing = useMutation({
         mutationFn: async () => {
@@ -138,10 +151,10 @@ export const useProfile = (id?: string, predicate?: string) => {
                 }
             })
         }
-    });
+    })
 
     const isCurrentUser = useMemo(() => {
-       return id ===  queryClient.getQueryData<User>(['user'])?.id
+        return id === queryClient.getQueryData<User>(['user'])?.id
     }, [id, queryClient])
 
     return {
@@ -156,6 +169,10 @@ export const useProfile = (id?: string, predicate?: string) => {
         updateProfile,
         updateFollowing,
         followings,
-        loadingFollowings
+        loadingFollowings,
+        userActivities,
+        loadingUserActivities,
+        setFilter,
+        filter
     }
 }
