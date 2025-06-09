@@ -1,4 +1,4 @@
-import { Box, Container, CssBaseline } from "@mui/material";
+import { Box, CssBaseline } from "@mui/material";
 import NavBar from "./NavBar";
 import { Outlet, ScrollRestoration, useLocation } from "react-router";
 import HomePage from "../../features/home/HomePage";
@@ -15,9 +15,11 @@ function App() {
       ) : (
         <>
           <NavBar />
-          <Container maxWidth="xl" sx={{ pt: 14 }}>
+          <Box maxWidth="xl" sx={{ pt: 14,
+            px: {xs: 2, sm: 3, md: 4}
+           }}>
             <Outlet />
-          </Container>
+          </Box>
         </>
       )}
     </Box>

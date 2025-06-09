@@ -27,7 +27,7 @@ builder.Services.AddControllers(opt =>
 });
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 //add cors
@@ -77,6 +77,11 @@ app.UseCors(x => x
 app.UseAuthentication();
 app.UseAuthorization();
 
+//means its going to look for smth in the wwwroot folder called index.html, if that exists its going to return that
+app.UseDefaultFiles();
+//is just to tell it to use the content inside wwwroot subfolder and serve it that is requested at the root path
+app.UseStaticFiles();
+
 // Authorization middleware (optional but recommended)
 // app.UseAuthorization();
 
@@ -84,6 +89,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapGroup("api").MapIdentityApi<User>(); //api/login
 app.MapHub<CommentHub>("/comments");
+app.MapFallbackToController("Index", "Fallback");
 
 
 using var scope = app.Services.CreateScope();
